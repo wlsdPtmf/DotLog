@@ -79,13 +79,16 @@ const UI = {
 
         // Modal New Project
         const btnNewProject = document.getElementById('btn-new-project');
+        const btnFabProject = document.getElementById('btn-fab-new-project');
         const modalNew = document.getElementById('modal-project');
-        if (btnNewProject && modalNew) {
-            btnNewProject.onclick = () => {
-                modalNew.style.display = 'flex';
-                modalNew.classList.add('active');
-            };
-        }
+
+        const openProjectModal = () => {
+            modalNew.style.display = 'flex';
+            modalNew.classList.add('active');
+        };
+
+        if (btnNewProject) btnNewProject.onclick = openProjectModal;
+        if (btnFabProject) btnFabProject.onclick = openProjectModal;
         const btnCloseNew = document.getElementById('btn-close-modal');
         if (btnCloseNew && modalNew) {
             btnCloseNew.onclick = () => {
