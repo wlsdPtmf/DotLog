@@ -54,12 +54,7 @@ const UI = {
         const base64Input = document.getElementById('project-image-base64');
 
         if (imgPreview && fileInput) {
-            const triggerSelect = (e) => {
-                e.preventDefault();
-                fileInput.click();
-            };
-            imgPreview.addEventListener('click', triggerSelect);
-            imgPreview.addEventListener('touchend', triggerSelect);
+            imgPreview.onclick = () => fileInput.click();
 
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
@@ -158,26 +153,29 @@ const UI = {
     },
 
     resizeImage(file, maxWidth, callback) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/jpeg', 0.8));
-            };
-            img.src = e.target.result;
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            callback(dataUrl);
+            URL.revokeObjectURL(img.src);
         };
-        reader.readAsDataURL(file);
+        img.onerror = () => {
+            alert('이미지를 불러오는 데 실패했습니다.');
+            URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
     },
 
     switchPage(pageId) {
