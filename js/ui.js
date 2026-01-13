@@ -126,6 +126,12 @@ const UI = {
                     image: formData.get('image'),
                     status: '진행'
                 };
+                if (!Auth.user) {
+                    this.showToast("🔒 저장하려면 먼저 로그인해주세요!");
+                    this.switchPage('auth');
+                    modalNew.style.display = 'none';
+                    return;
+                }
                 if (DB.addProject(project)) {
                     this.renderDashboard();
                     this.showToast("🚀 새로운 도안이 등록되었습니다!");
@@ -143,6 +149,12 @@ const UI = {
         if (formBead) {
             formBead.onsubmit = (e) => {
                 e.preventDefault();
+                if (!Auth.user) {
+                    this.showToast("🔒 저장하려면 먼저 로그인해주세요!");
+                    this.switchPage('auth');
+                    document.getElementById('modal-bead').style.display = 'none';
+                    return;
+                }
                 const formData = new FormData(formBead);
                 const dmc = formData.get('dmc').trim();
                 const count = parseInt(formData.get('count'));
@@ -231,15 +243,20 @@ const UI = {
         const projects = DB.getProjects().filter(p => p.status === '진행');
 
         if (projects.length === 0) {
+            const isGuest = !Auth.user;
             container.innerHTML = `
-                <div class="onboarding-card">
-                    <h3>✨ 환영합니다!</h3>
-                    <p>아직 진행 중인 도안이 없네요.<br>새로운 도안을 등록하고 작업을 시작해볼까요?</p>
-                    <button class="btn-guide" onclick="document.getElementById('btn-new-project').click()">지금 도안 등록하기</button>
+                <div class="onboarding-card" style="${isGuest ? 'background: linear-gradient(135deg, #6b7280, #9ca3af);' : ''}">
+                    <h3>${isGuest ? '👋 안녕하세요! 손님' : '✨ 환영합니다!'}</h3>
+                    <p>${isGuest ? '작품을 안전하게 클라우드에 저장하려면<br>로그인이 필요합니다.' : '아직 진행 중인 도안이 없네요.<br>새로운 도안을 등록하고 작업을 시작해볼까요?'}</p>
+                    <button class="btn-guide" onclick="${isGuest ? "UI.switchPage('auth')" : "document.getElementById('btn-new-project').click()"}">
+                        ${isGuest ? '로그인하러 가기' : '지금 도안 등록하기'}
+                    </button>
                 </div>
+                ${isGuest ? '' : `
                 <div class="card" style="text-align:center; padding:2rem; color:var(--text-support); background:none; border:none; box-shadow:none;">
                     TIP: AI 스캔 기능을 사용하면 비즈 리스트를 더 빨리 등록할 수 있어요!
                 </div>
+                `}
             `;
             return;
         }
