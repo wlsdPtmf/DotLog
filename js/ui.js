@@ -291,4 +291,4 @@ const UI = {
 };
 
 window.UI = UI;
-UI.init();
+// UI.init(); 닫기

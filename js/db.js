@@ -159,5 +159,5 @@ const DB = {
     }
 };
 
-DB.init();
+// DB.init();
 window.DB = DB;

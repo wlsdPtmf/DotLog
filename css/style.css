@@ -158,6 +158,15 @@ body {
     box-shadow: var(--card-shadow);
 }
 
+#auth-switch {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#auth-switch:hover {
+    opacity: 0.8;
+}
+
 .upload-area:hover {
     border-color: var(--primary);
     background: rgba(130, 87, 229, 0.02);

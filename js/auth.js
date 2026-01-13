@@ -113,5 +113,5 @@ const Auth = {
     }
 };
 
-Auth.init();
+// Auth.init(); // Removed auto-init
 window.Auth = Auth;
