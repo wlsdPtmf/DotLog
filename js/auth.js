@@ -34,15 +34,22 @@ const Auth = {
         const title = document.getElementById('auth-title');
         const submitBtn = document.getElementById('btn-auth-submit');
         const switchText = document.getElementById('auth-switch-text');
+        const authBox = document.getElementById('auth-box');
+
+        if (!title || !submitBtn || !switchText || !authBox) return;
 
         if (this.isLoginMode) {
             title.innerText = '로그인';
             submitBtn.innerText = '로그인';
-            switchText.innerHTML = `계정이 없으신가요? <span id="auth-switch" style="color: var(--primary); font-weight: 700; cursor: pointer;">회원가입</span>`;
+            submitBtn.style.background = 'var(--primary)';
+            authBox.style.borderTop = 'none';
+            switchText.innerHTML = `계정이 없으신가요? <span id="auth-switch" style="color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">회원가입</span>`;
         } else {
             title.innerText = '회원가입';
             submitBtn.innerText = '가입하기';
-            switchText.innerHTML = `이미 계정이 있으신가요? <span id="auth-switch" style="color: var(--primary); font-weight: 700; cursor: pointer;">로그인</span>`;
+            submitBtn.style.background = 'var(--secondary)';
+            authBox.style.borderTop = '5px solid var(--secondary)';
+            switchText.innerHTML = `이미 계정이 있으신가요? <span id="auth-switch" style="color: var(--secondary); font-weight: 700; cursor: pointer; text-decoration: underline;">로그인</span>`;
         }
     },
 
