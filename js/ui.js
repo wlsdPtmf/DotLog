@@ -54,7 +54,13 @@ const UI = {
         const base64Input = document.getElementById('project-image-base64');
 
         if (imgPreview && fileInput) {
-            imgPreview.addEventListener('click', () => fileInput.click());
+            const triggerSelect = (e) => {
+                e.preventDefault();
+                fileInput.click();
+            };
+            imgPreview.addEventListener('click', triggerSelect);
+            imgPreview.addEventListener('touchend', triggerSelect);
+
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
