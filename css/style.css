@@ -365,6 +365,116 @@ body {
     }
 }
 
+/* Mobile Responsiveness Improvements */
+@media (max-width: 600px) {
+    body {
+        padding-bottom: 120px;
+        /* Space for bottom nav */
+    }
+
+    .main-wrapper {
+        padding: 1rem 1rem;
+    }
+
+    .header-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .logo-text {
+        font-size: 1.8rem;
+    }
+
+    .tagline {
+        font-size: 0.85rem;
+    }
+
+    /* Modal Adjustments */
+    .modal-content {
+        padding: 1.5rem;
+        border-radius: 24px;
+        width: 95%;
+    }
+
+    /* Table Adjustments - Card view for mobile */
+    .data-table thead {
+        display: none;
+        /* Hide headers on small mobile */
+    }
+
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table tr {
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 10px;
+        background: white;
+        position: relative;
+    }
+
+    .data-table td {
+        border: none;
+        padding: 8px 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .data-table td:first-child::before {
+        content: "DMC 번호";
+        font-weight: 600;
+        color: var(--text-support);
+        font-size: 0.8rem;
+    }
+
+    .data-table td:nth-child(2)::before {
+        content: "수량";
+        font-weight: 600;
+        color: var(--text-support);
+        font-size: 0.8rem;
+    }
+
+    .data-table td:nth-child(3)::before {
+        content: "위치";
+        font-weight: 600;
+        color: var(--text-support);
+        font-size: 0.8rem;
+    }
+
+    /* Scanner Grid Fix */
+    .scanner-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Bottom Nav adjustment */
+    .bottom-nav {
+        bottom: 15px;
+        padding: 12px 5px;
+        width: 95%;
+    }
+
+    .nav-item i {
+        font-size: 1.5rem;
+    }
+
+    .nav-item span {
+        font-size: 0.75rem;
+    }
+
+    /* Button adjustments */
+    .btn-primary {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
+
 .hidden {
     display: none;
 }
@@ -386,6 +496,7 @@ body {
         opacity: 0;
         transform: translateY(40px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
