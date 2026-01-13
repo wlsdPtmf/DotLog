@@ -475,6 +475,87 @@ body {
     }
 }
 
+/* Toast Notification */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20000;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastPop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), toastFadeOut 0.5s ease-in 2.5s forwards;
+}
+
+@keyframes toastPop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* Onboarding Style */
+.onboarding-card {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    padding: 2.5rem;
+    border-radius: 32px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(130, 87, 229, 0.2);
+}
+
+.onboarding-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.onboarding-card p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.onboarding-card .btn-guide {
+    background: white;
+    color: var(--primary);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 800;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.onboarding-card .btn-guide:hover {
+    transform: scale(1.05);
+}
+
 .hidden {
     display: none;
 }

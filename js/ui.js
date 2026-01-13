@@ -6,6 +6,16 @@ const UI = {
         this.renderDashboard();
     },
 
+    showToast(msg) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<span>${msg}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    },
+
     bindEvents() {
         // Navigation (Bottom Nav)
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -115,6 +125,7 @@ const UI = {
                 };
                 if (DB.addProject(project)) {
                     this.renderDashboard();
+                    this.showToast("🚀 새로운 도안이 등록되었습니다!");
                     formProject.reset();
                     if (imgPreview) imgPreview.innerHTML = `<i class="fas fa-image" style="font-size: 2rem; color: var(--text-support);"></i>`;
                     if (base64Input) base64Input.value = '';
@@ -145,6 +156,7 @@ const UI = {
 
                 DB.saveBead(bead);
                 this.renderInventory();
+                this.showToast(`💎 DMC ${dmc} 비즈가 추가되었습니다.`);
                 formBead.reset();
                 modalBead.style.display = 'none';
                 modalBead.classList.remove('active');
@@ -216,7 +228,16 @@ const UI = {
         const projects = DB.getProjects().filter(p => p.status === '진행');
 
         if (projects.length === 0) {
-            container.innerHTML = `<div class="card" style="text-align:center; padding:4rem 2rem; color:var(--text-support);">진행 중인 도안이 없습니다.</div>`;
+            container.innerHTML = `
+                <div class="onboarding-card">
+                    <h3>✨ 환영합니다!</h3>
+                    <p>아직 진행 중인 도안이 없네요.<br>새로운 도안을 등록하고 작업을 시작해볼까요?</p>
+                    <button class="btn-guide" onclick="document.getElementById('btn-new-project').click()">지금 도안 등록하기</button>
+                </div>
+                <div class="card" style="text-align:center; padding:2rem; color:var(--text-support); background:none; border:none; box-shadow:none;">
+                    TIP: AI 스캔 기능을 사용하면 비즈 리스트를 더 빨리 등록할 수 있어요!
+                </div>
+            `;
             return;
         }
 
@@ -346,7 +367,7 @@ const UI = {
             this.renderDashboard();
             this.renderCollection();
             this.switchPage('collection');
-            alert('완성을 축하합니다!');
+            this.showToast("🎉 완성을 축하드립니다! 도감에 저장되었습니다.");
         }
     },
 
@@ -422,6 +443,7 @@ const UI = {
         if (confirm('비즈를 삭제하시겠습니까?')) {
             DB.deleteBead(id);
             this.renderInventory();
+            this.showToast("🗑️ 비즈가 삭제되었습니다.");
         }
     },
 
