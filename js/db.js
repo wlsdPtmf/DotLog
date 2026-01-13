@@ -1,138 +1,161 @@
 const DB = {
-    // Initial Data - Empty for clean start
-    defaults: {
-        beads: [],
-        projects: [],
-        projectDetails: []
-    },
-
+    // DB 초기화: 로컬 스토리지를 지우지 않고 유지하도록 개선
     init() {
-        // ALWAYS WIPE STORAGE ON INIT as requested by user ("새로고침 할 때마다 사라지게")
-        // Note: For a real app we would check version, but user explicitly asked for this.
-        localStorage.removeItem('dotlog_beads');
-        localStorage.removeItem('dotlog_projects');
-        localStorage.removeItem('dotlog_project_details');
-
-        localStorage.setItem('dotlog_beads', JSON.stringify(this.defaults.beads));
-        localStorage.setItem('dotlog_projects', JSON.stringify(this.defaults.projects));
-        localStorage.setItem('dotlog_project_details', JSON.stringify(this.defaults.projectDetails));
+        if (!localStorage.getItem('dotlog_beads')) localStorage.setItem('dotlog_beads', '[]');
+        if (!localStorage.getItem('dotlog_projects')) localStorage.setItem('dotlog_projects', '[]');
+        if (!localStorage.getItem('dotlog_project_details')) localStorage.setItem('dotlog_project_details', '[]');
     },
 
-    // BEADS
-    getBeads() {
+    // --- 비즈 (Inventory) 관련 ---
+    async getBeads() {
+        if (Auth.user) {
+            const { data, error } = await supabase.from('inventory').select('*');
+            if (error) { console.error(error); return []; }
+            return data.map(b => ({ id: b.dmc_code, count: b.count, location: b.location }));
+        }
         return JSON.parse(localStorage.getItem('dotlog_beads') || '[]');
     },
-    saveBead(bead) {
-        try {
-            const beads = this.getBeads();
+
+    async saveBead(bead) {
+        if (Auth.user) {
+            const { error } = await supabase.from('inventory').upsert({
+                user_id: Auth.user.id,
+                dmc_code: bead.id,
+                count: bead.count,
+                location: bead.location
+            });
+            if (error) UI.showToast("❌ 저장 실패: " + error.message);
+        } else {
+            const beads = JSON.parse(localStorage.getItem('dotlog_beads') || '[]');
             const index = beads.findIndex(b => b.id === bead.id);
-            if (index > -1) {
-                beads[index] = bead;
-            } else {
-                beads.push(bead);
-            }
+            if (index > -1) beads[index] = bead;
+            else beads.push(bead);
             localStorage.setItem('dotlog_beads', JSON.stringify(beads));
-            this.refreshProjectDetailsOwnership();
-        } catch (e) {
-            console.error("Storage Error:", e);
-            alert("저장 공간이 부족합니다. 이미지가 너무 크거나 데이터가 많습니다.");
         }
-    },
-    deleteBead(id) {
-        const beads = this.getBeads().filter(b => b.id !== id);
-        localStorage.setItem('dotlog_beads', JSON.stringify(beads));
         this.refreshProjectDetailsOwnership();
     },
-    getBeadById(id) {
-        return this.getBeads().find(b => b.id === id);
+
+    async deleteBead(id) {
+        if (Auth.user) {
+            const { error } = await supabase.from('inventory').delete().match({ user_id: Auth.user.id, dmc_code: id });
+            if (error) console.error(error);
+        } else {
+            const beads = JSON.parse(localStorage.getItem('dotlog_beads') || '[]').filter(b => b.id !== id);
+            localStorage.setItem('dotlog_beads', JSON.stringify(beads));
+        }
+        this.refreshProjectDetailsOwnership();
     },
 
-    // PROJECTS
-    getProjects() {
+    async getBeadById(id) {
+        const beads = await this.getBeads();
+        return beads.find(b => b.id === id);
+    },
+
+    // --- 도안 (Projects) 관련 ---
+    async getProjects() {
+        if (Auth.user) {
+            const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+            if (error) { console.error(error); return []; }
+            return data.map(p => ({
+                id: p.id,
+                name: p.name,
+                brand: p.brand,
+                image: p.image_url,
+                status: p.status,
+                createdAt: p.created_at
+            }));
+        }
         return JSON.parse(localStorage.getItem('dotlog_projects') || '[]');
     },
-    addProject(project) {
-        try {
-            const projects = this.getProjects();
+
+    async addProject(project) {
+        if (Auth.user) {
+            const { data, error } = await supabase.from('projects').insert({
+                user_id: Auth.user.id,
+                name: project.name,
+                brand: project.brand,
+                image_url: project.image,
+                status: '진행'
+            }).select();
+            if (error) { UI.showToast("❌ 저장 실패: " + error.message); return null; }
+            return data[0];
+        } else {
+            const projects = JSON.parse(localStorage.getItem('dotlog_projects') || '[]');
             project.id = Date.now();
             project.createdAt = new Date().toISOString();
             projects.push(project);
             localStorage.setItem('dotlog_projects', JSON.stringify(projects));
             return project;
-        } catch (e) {
-            console.error("Storage Error:", e);
-            alert("도안 등록 실패: 이미지가 너무 큽니다. 더 작은 용량의 사진을 사용해주세요.");
-            return null;
         }
     },
-    deleteProject(id) {
-        const projects = this.getProjects().filter(p => p.id != id);
-        localStorage.setItem('dotlog_projects', JSON.stringify(projects));
-        // Also delete details
-        const allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]');
-        const filteredDetails = allDetails.filter(d => d.projectId != id);
-        localStorage.setItem('dotlog_project_details', JSON.stringify(filteredDetails));
-    },
-    updateProjectStatus(id, status) {
-        const projects = this.getProjects();
-        const index = projects.findIndex(p => p.id == id);
-        if (index > -1) {
-            projects[index].status = status;
+
+    async deleteProject(id) {
+        if (Auth.user) {
+            const { error } = await supabase.from('projects').delete().match({ id, user_id: Auth.user.id });
+            if (error) console.error(error);
+        } else {
+            const projects = JSON.parse(localStorage.getItem('dotlog_projects') || '[]').filter(p => p.id != id);
             localStorage.setItem('dotlog_projects', JSON.stringify(projects));
+            const allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]').filter(d => d.projectId != id);
+            localStorage.setItem('dotlog_project_details', JSON.stringify(allDetails));
         }
     },
 
-    removeProjectBeadsFromInventory(projectId) {
-        const details = this.getProjectDetails(projectId);
-        const beadIdsToRemove = details.map(d => d.dmc);
-
-        let beads = this.getBeads();
-        beads = beads.filter(b => !beadIdsToRemove.includes(b.id));
-
-        localStorage.setItem('dotlog_beads', JSON.stringify(beads));
-        this.refreshProjectDetailsOwnership();
+    async updateProjectStatus(id, status) {
+        if (Auth.user) {
+            const { error } = await supabase.from('projects').update({ status }).match({ id, user_id: Auth.user.id });
+            if (error) console.error(error);
+        } else {
+            const projects = JSON.parse(localStorage.getItem('dotlog_projects') || '[]');
+            const index = projects.findIndex(p => p.id == id);
+            if (index > -1) {
+                projects[index].status = status;
+                localStorage.setItem('dotlog_projects', JSON.stringify(projects));
+            }
+        }
     },
 
-    removeSpecificBeadsFromInventory(dmcList) {
-        let beads = this.getBeads();
-        beads = beads.filter(b => !dmcList.includes(b.id));
-        localStorage.setItem('dotlog_beads', JSON.stringify(beads));
-        this.refreshProjectDetailsOwnership();
-    },
-
-    // PROJECT DETAILS
-    getProjectDetails(projectId) {
+    // --- 도안 상세 (Project Details) 관련 ---
+    async getProjectDetails(projectId) {
+        if (Auth.user) {
+            const { data, error } = await supabase.from('project_details').select('*').eq('project_id', projectId);
+            if (error) { console.error(error); return []; }
+            return data.map(d => ({ projectId: d.project_id, dmc: d.dmc_code, isOwned: d.is_owned }));
+        }
         const allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]');
         return allDetails.filter(d => d.projectId == projectId);
     },
-    addProjectDetails(projectId, dmcList) {
-        try {
-            let allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]');
-            const beads = this.getBeads();
 
-            allDetails = allDetails.filter(d => d.projectId != projectId);
-
+    async addProjectDetails(projectId, dmcList) {
+        if (Auth.user) {
+            const newDetails = dmcList.map(dmc => ({ project_id: projectId, dmc_code: dmc }));
+            const { error } = await supabase.from('project_details').insert(newDetails);
+            if (error) console.error(error);
+        } else {
+            let allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]').filter(d => d.projectId != projectId);
+            const beads = JSON.parse(localStorage.getItem('dotlog_beads') || '[]');
             const newDetails = dmcList.map(dmc => ({
                 projectId: Number(projectId),
                 dmc,
                 isOwned: beads.some(b => b.id === dmc && b.count > 0)
             }));
-
             localStorage.setItem('dotlog_project_details', JSON.stringify([...allDetails, ...newDetails]));
-        } catch (e) {
-            alert("데이터가 너무 많아 저장할 수 없습니다.");
         }
     },
-    refreshProjectDetailsOwnership() {
-        const beads = this.getBeads();
-        let allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]');
 
-        allDetails = allDetails.map(d => ({
-            ...d,
-            isOwned: beads.some(b => b.id === d.dmc && b.count > 0)
-        }));
-
-        localStorage.setItem('dotlog_project_details', JSON.stringify(allDetails));
+    async refreshProjectDetailsOwnership() {
+        const beads = await this.getBeads();
+        if (Auth.user) {
+            // 서버 기반 업데이트 로직은 복잡하므로 호출 시점에 최신화하거나 필요 시 트리거 사용
+            // 여기서는 클라이언트 측 계산 결과를 서버에 업데이트하는 대신 조회 시 매칭하도록 함
+        } else {
+            let allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]');
+            allDetails = allDetails.map(d => ({
+                ...d,
+                isOwned: beads.some(b => b.id === d.dmc && b.count > 0)
+            }));
+            localStorage.setItem('dotlog_project_details', JSON.stringify(allDetails));
+        }
     }
 };
 

@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://nwpegctozibowenczkmk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cGVnY3Rvemlib3dlbmN6a21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyOTU0NjcsImV4cCI6MjA4Mzg3MTQ2N30.j1q7cUeHaseuwBj7LJ-gYp_3xYrbZ7aIn0bAJOvLGvQ';
 const { createClient } = window.supabase;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
