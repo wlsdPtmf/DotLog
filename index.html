@@ -39,7 +39,13 @@
         <!-- Dynamic Pages -->
         <main id="page-content">
             <section id="page-dashboard" class="page active">
-                <h2 class="section-title">진행 중인 도안</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 class="section-title" style="margin:0;">진행 중인 도안</h2>
+                    <button class="btn-primary" id="btn-new-project"
+                        style="border-radius: 30px; width: auto; height: auto; padding: 12px 24px; font-size: 0.95rem;">
+                        <i class="fas fa-plus"></i> 도안 등록
+                    </button>
+                </div>
                 <div id="active-projects-container">
                     <!-- Project cards render here -->
                 </div>
@@ -165,15 +171,7 @@
         </main>
     </div>
 
-    <!-- FAB -->
-    <div class="fab-container">
-        <div class="fab-item" style="position: relative;">
-            <div class="fab-label">도안 등록</div>
-            <button class="fab-main" id="btn-fab-new-project">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
-    </div>
+
 
     <!-- Bottom Nav -->
     <nav class="bottom-nav">
