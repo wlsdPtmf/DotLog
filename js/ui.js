@@ -39,15 +39,20 @@ const UI = {
             }
         });
 
-        const imgInput = document.getElementById('project-image');
-        const imgPreview = document.getElementById('image-preview');
-        const base64Input = document.getElementById('base64-image');
+        const imgInput = document.getElementById('input-project-image');
+        const imgPreview = document.getElementById('project-img-preview');
+        const base64Input = document.getElementById('project-image-base64');
+
+        if (imgPreview && imgInput) {
+            imgPreview.addEventListener('click', () => imgInput.click());
+        }
+
         if (imgInput) {
             imgInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     this.resizeImage(file, 400, (base64) => {
-                        imgPreview.innerHTML = `<img src="${base64}" style="width:100%; height:100%; object-fit:cover;">`;
+                        imgPreview.innerHTML = `<img src="${base64}" style="width:100%; height:100%; object-fit:cover; border-radius: 16px;">`;
                         base64Input.value = base64;
                     });
                 }
@@ -92,13 +97,25 @@ const UI = {
                     return;
                 }
                 const formData = new FormData(formProject);
-                const project = { name: formData.get('name'), brand: formData.get('brand'), image: formData.get('image'), status: '진행' };
+                const fileInput = document.getElementById('input-project-image');
+                const file = fileInput.files[0];
+                const base64Image = document.getElementById('project-image-base64').value; // Keep for fallback or preview
+
+                const project = {
+                    name: formData.get('name'),
+                    brand: formData.get('brand'),
+                    image: base64Image, // Default to base64 if no upload happens (or for local)
+                    file: file, // Pass file object for DB to handle upload
+                    status: '진행'
+                };
+
                 if (await DB.addProject(project)) {
                     this.renderDashboard();
                     this.showToast("🚀 새로운 도안이 등록되었습니다!");
                     formProject.reset();
                     imgPreview.innerHTML = `<i class="fas fa-image" style="font-size: 2rem; color: var(--text-support);"></i>`;
                     base64Input.value = '';
+                    fileInput.value = ''; // Reset file input
                     modalNew.style.display = 'none';
                     modalNew.classList.remove('active');
                 }

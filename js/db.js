@@ -62,19 +62,57 @@ const DB = {
                 brand: p.brand,
                 image: p.image_url,
                 status: p.status,
-                createdAt: p.created_at
+                createdAt: p.created_at,
+                userId: p.user_id
             }));
         }
         return JSON.parse(localStorage.getItem('dotlog_projects') || '[]');
     },
 
+    async uploadImage(file) {
+        if (!Auth.user || !file) return null;
+
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Auth.user.id}/${Date.now()}.${fileExt}`;
+
+            // Upload to 'images' bucket
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                console.error('Upload Error:', uploadError);
+                throw uploadError;
+            }
+
+            // Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('images')
+                .getPublicUrl(fileName);
+
+            return publicUrl;
+        } catch (err) {
+            UI.showToast("❌ 이미지 업로드 실패: " + err.message);
+            return null;
+        }
+    },
+
     async addProject(project) {
         if (Auth.user) {
+            let imageUrl = project.image;
+
+            // Check if 'image' is a File object (not base64 string)
+            if (project.file instanceof File) {
+                const uploadedUrl = await this.uploadImage(project.file);
+                if (uploadedUrl) imageUrl = uploadedUrl;
+            }
+
             const { data, error } = await supabase.from('projects').insert({
                 user_id: Auth.user.id,
                 name: project.name,
                 brand: project.brand,
-                image_url: project.image,
+                image_url: imageUrl,
                 status: '진행'
             }).select();
             if (error) { UI.showToast("❌ 저장 실패: " + error.message); return null; }

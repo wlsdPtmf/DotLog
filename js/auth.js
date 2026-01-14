@@ -7,15 +7,19 @@ const Auth = {
     isLoginMode: true,
     user: null,
 
-    init() {
+    async init() {
+        console.log('Auth Init started');
         this.bindEvents();
-        this.checkSession();
+        await this.checkSession();
+        console.log('Auth Init finished');
     },
 
     bindEvents() {
-        // Toggle Login/Signup Mode
+        console.log('Binding Auth events');
+        // Toggle Login/Signup Mode - Using delegation on the switchText container
         document.body.addEventListener('click', (e) => {
-            if (e.target.id === 'auth-switch') {
+            if (e.target && (e.target.id === 'auth-switch' || e.target.closest('#auth-switch'))) {
+                console.log('Auth switch clicked, current mode:', this.isLoginMode);
                 this.isLoginMode = !this.isLoginMode;
                 this.updateUI();
             }
@@ -23,10 +27,13 @@ const Auth = {
 
         const formAuth = document.getElementById('form-auth');
         if (formAuth) {
-            formAuth.onsubmit = (e) => {
+            formAuth.addEventListener('submit', (e) => {
                 e.preventDefault();
+                console.log('Auth form submitted, mode:', this.isLoginMode ? 'login' : 'signup');
                 this.handleSubmit();
-            };
+            });
+        } else {
+            console.error('form-auth not found during bindEvents');
         }
     },
 
@@ -36,7 +43,10 @@ const Auth = {
         const switchText = document.getElementById('auth-switch-text');
         const authBox = document.getElementById('auth-box');
 
-        if (!title || !submitBtn || !switchText || !authBox) return;
+        if (!title || !submitBtn || !switchText || !authBox) {
+            console.error('Auth UI elements missing:', { title, submitBtn, switchText, authBox });
+            return;
+        }
 
         if (this.isLoginMode) {
             title.innerText = '로그인';
@@ -116,6 +126,18 @@ const Auth = {
         } else {
             UI.showToast("👋 로그아웃 되었습니다.");
             location.reload(); // 세션 완전 초기화
+        }
+    },
+
+    async handleGithubLogin() {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'github',
+            options: {
+                redirectTo: window.location.href // Returns to current page
+            }
+        });
+        if (error) {
+            UI.showToast(`❌ GitHub 로그인 실패: ${error.message}`);
         }
     }
 };

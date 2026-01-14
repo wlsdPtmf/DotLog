@@ -196,6 +196,16 @@
                                     <input type="password" id="auth-password" placeholder="비밀번호" required
                                         style="width: 100%; padding: 1.1rem; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-light); font-size: 1rem;">
                                 </div>
+                                <button type="button" onclick="Auth.handleGithubLogin()" class="btn-primary"
+                                    style="width: 100%; background: #24292e; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                    <i class="fab fa-github"></i> GitHub으로 계속하기
+                                </button>
+                                <div
+                                    style="display: flex; align-items: center; margin-bottom: 15px; color: var(--text-support);">
+                                    <hr style="flex: 1; border: 0; border-top: 1px solid var(--border);">
+                                    <span style="padding: 0 10px; font-size: 0.8rem;">또는 이메일로</span>
+                                    <hr style="flex: 1; border: 0; border-top: 1px solid var(--border);">
+                                </div>
                                 <button type="submit" class="btn-primary" id="btn-auth-submit"
                                     style="width: 100%;">로그인</button>
                             </form>

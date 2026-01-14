@@ -1,10 +1,12 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('App DOM Content Loaded');
+const initApp = async () => {
+    console.log('App initialization started');
 
     // 1. Auth & DB 초기화 (기초 데이터)
     if (window.Auth) {
         console.log('Initializing Auth...');
         await window.Auth.init();
+    } else {
+        console.error('Auth object not found!');
     }
 
     if (window.DB) {
@@ -23,4 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Initializing OCR...');
         window.OCR.init();
     }
-});
+
+    console.log('App initialization completed');
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
