@@ -1,0 +1,196 @@
+/* 
+   DotLog Design System 
+   Theme: Midnight Jewel (Premium Dark/Deep Blue) 
+*/
+
+:root {
+    /* ------------------------------
+       1. Colors
+    ------------------------------ */
+    /* Primary Brand Colors */
+    --primary-hue: 250;
+    /* Deep Purple/Blue */
+    --primary: hsl(var(--primary-hue), 80%, 65%);
+    /* Main Brand Color */
+    --primary-dark: hsl(var(--primary-hue), 80%, 50%);
+    --primary-light: hsl(var(--primary-hue), 90%, 85%);
+    --primary-glow: hsla(var(--primary-hue), 80%, 65%, 0.4);
+
+    /* Accents (Jewel Tones) */
+    --accent-pink: hsl(320, 90%, 70%);
+    --accent-cyan: hsl(190, 80%, 60%);
+    --accent-gold: hsl(45, 90%, 60%);
+    /* For Leveling/Badges */
+
+    /* Backgrounds (Dark Mode Base) */
+    --bg-main: #0f1016;
+    /* Very Dark Blue-Black */
+    --bg-card: rgba(30, 30, 40, 0.7);
+    /* Glassmorphism Base */
+    --bg-card-hover: rgba(40, 40, 55, 0.9);
+    --bg-glass: rgba(255, 255, 255, 0.05);
+
+    /* Text */
+    --text-main: #ffffff;
+    --text-muted: #a0a0b0;
+    --text-inverse: #0f1016;
+
+    /* Borders */
+    --border-light: rgba(255, 255, 255, 0.1);
+    --border-glow: rgba(130, 87, 229, 0.3);
+
+    /* ------------------------------
+       2. Typography
+    ------------------------------ */
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Noto Sans KR', sans-serif;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2rem;
+
+    /* ------------------------------
+       3. Spacing & Radius
+    ------------------------------ */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-full: 9999px;
+
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* ------------------------------
+       4. Shadows & Effects
+    ------------------------------ */
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 20px var(--primary-glow);
+    --glass-blur: blur(12px);
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ------------------------------
+   Reset & Base
+------------------------------ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+}
+
+a,
+button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+/* ------------------------------
+   Typography
+------------------------------ */
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.page-title {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-4);
+    position: relative;
+    display: inline-block;
+}
+
+.page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent-pink));
+    border-radius: var(--radius-full);
+}
+
+/* ------------------------------
+   Layout Containers
+------------------------------ */
+.app-container {
+    max-width: 600px;
+    /* Mobile-first Web App feel */
+    margin: 0 auto;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    background: radial-gradient(circle at top right, rgba(130, 87, 229, 0.1), transparent 40%);
+    padding-bottom: 80px;
+    /* Space for Bottom Nav */
+}
+
+.content-area {
+    padding: var(--space-4);
+    padding-top: 80px;
+    /* Space for Header */
+    animation: fadeIn 0.5s ease;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------------------------
+   Utility Classes (Hidden/Active)
+------------------------------ */
+.hidden {
+    display: none !important;
+}
+
+.page-section {
+    display: none;
+}
+
+.page-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}

@@ -1,0 +1,116 @@
+/* 
+   DotLog Animations & Micro-interactions
+   Making it feel "Premium" & "Alive"
+*/
+
+/* 1. Staggered Entry for Lists */
+.collection-grid .collection-card {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.collection-grid .collection-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.collection-grid .collection-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.collection-grid .collection-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.collection-grid .collection-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.collection-grid .collection-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.collection-grid .collection-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 2. Sparkle Effect for "Completed" items */
+@keyframes sparkle {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.sparkle-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* 3. Button Press Ripple (Simplified CSS version) */
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+/* 4. Pulse Animation for "New Record" button to draw attention */
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(130, 87, 229, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(130, 87, 229, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(130, 87, 229, 0);
+    }
+}
+
+.dashboard-actions .btn-action.primary {
+    animation: pulse-glow 3s infinite;
+}
+
+/* 5. Glass Shimmer on Cards */
+.collection-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(120deg,
+            rgba(255, 255, 255, 0) 30%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0) 70%);
+    transform: translateX(-100%);
+    transition: 0.6s;
+}
+
+.collection-card:hover::after {
+    transform: translateX(100%);
+}

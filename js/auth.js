@@ -5,143 +5,95 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 window.supabaseClient = supabaseClient;
 
 const Auth = {
-    isLoginMode: true,
     user: null,
 
     async init() {
-        console.log('Auth Init started');
         this.bindEvents();
         await this.checkSession();
-        console.log('Auth Init finished');
     },
 
     bindEvents() {
-        console.log('Binding Auth events');
-        // Toggle Login/Signup Mode - Using delegation on the switchText container
-        document.body.addEventListener('click', (e) => {
-            if (e.target && (e.target.id === 'auth-switch' || e.target.closest('#auth-switch'))) {
-                console.log('Auth switch clicked, current mode:', this.isLoginMode);
-                this.isLoginMode = !this.isLoginMode;
-                this.updateUI();
-            }
-        });
-
-        const formAuth = document.getElementById('form-auth');
-        if (formAuth) {
-            formAuth.addEventListener('submit', (e) => {
+        // Simple Auth Form Handler (Login Only for MVP, but Toggle supported generally)
+        const authForm = document.getElementById('auth-form');
+        if (authForm) {
+            authForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                console.log('Auth form submitted, mode:', this.isLoginMode ? 'login' : 'signup');
-                this.handleSubmit();
+                this.handleLogin(); // Using same handler for now, extend if signup needed separately
             });
-        } else {
-            console.error('form-auth not found during bindEvents');
-        }
-    },
-
-    updateUI() {
-        const title = document.getElementById('auth-title');
-        const submitBtn = document.getElementById('btn-auth-submit');
-        const switchText = document.getElementById('auth-switch-text');
-        const authBox = document.getElementById('auth-box');
-
-        if (!title || !submitBtn || !switchText || !authBox) {
-            console.error('Auth UI elements missing:', { title, submitBtn, switchText, authBox });
-            return;
         }
 
-        if (this.isLoginMode) {
-            title.innerText = '로그인';
-            submitBtn.innerText = '로그인';
-            submitBtn.style.background = 'var(--primary)';
-            authBox.style.borderTop = 'none';
-            switchText.innerHTML = `계정이 없으신가요? <span id="auth-switch" style="color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline;">회원가입</span>`;
-        } else {
-            title.innerText = '회원가입';
-            submitBtn.innerText = '가입하기';
-            submitBtn.style.background = 'var(--secondary)';
-            authBox.style.borderTop = '5px solid var(--secondary)';
-            switchText.innerHTML = `이미 계정이 있으신가요? <span id="auth-switch" style="color: var(--secondary); font-weight: 700; cursor: pointer; text-decoration: underline;">로그인</span>`;
+        const btnToggle = document.getElementById('btn-toggle-signup');
+        if (btnToggle) {
+            btnToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('현재는 초대 기반 혹은 이메일 로그인만 지원됩니다 (데모). 바로 로그인을 시도하세요.');
+            });
+        }
+
+        const btnLogout = document.getElementById('btn-logout');
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => this.handleLogout());
         }
     },
 
     async checkSession() {
-        // 현재 세션 확인
         const { data: { user } } = await supabaseClient.auth.getUser();
         this.user = user;
-        this.renderAuthState();
+        this.updateHeaderUI();
 
-        // 인증 상태 변화 감지
         supabaseClient.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN') {
                 this.user = session.user;
-                this.renderAuthState();
-                if (UI.currentPage === 'auth') UI.switchPage('dashboard');
-                UI.showToast("🔓 로그인이 완료되었습니다.");
+                this.updateHeaderUI();
+                if (typeof UI !== 'undefined') UI.switchPage('dashboard');
             } else if (event === 'SIGNED_OUT') {
                 this.user = null;
-                this.renderAuthState();
+                this.updateHeaderUI();
+                if (typeof UI !== 'undefined') UI.switchPage('auth');
             }
         });
     },
 
-    renderAuthState() {
-        const loggedInView = document.getElementById('user-logged-in');
-        const loggedOutView = document.getElementById('user-logged-out');
-        const emailDisplay = document.getElementById('user-email-display');
+    updateHeaderUI() {
+        const guestView = document.querySelector('.status-guest');
+        const userView = document.querySelector('.status-user');
+        const userNickname = document.querySelector('.user-nickname');
 
         if (this.user) {
-            if (loggedInView) loggedInView.classList.remove('hidden');
-            if (loggedOutView) loggedOutView.classList.add('hidden');
-            if (emailDisplay) emailDisplay.innerText = this.user.email;
+            if (guestView) guestView.classList.add('hidden');
+            if (userView) userView.classList.remove('hidden');
+            if (userNickname) userNickname.innerText = (this.user.user_metadata?.nickname || this.user.email.split('@')[0]) + '님';
         } else {
-            if (loggedInView) loggedInView.classList.add('hidden');
-            if (loggedOutView) loggedOutView.classList.remove('hidden');
+            if (guestView) guestView.classList.remove('hidden');
+            if (userView) userView.classList.add('hidden');
         }
+
+        // Also refresh profile modal data if UI is present
+        if (typeof UI !== 'undefined' && UI.updateProfileModal) UI.updateProfileModal();
     },
 
-    async handleSubmit() {
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
+    async handleLogin() {
+        const email = document.getElementById('input-email').value;
+        const password = document.getElementById('input-password').value;
 
-        if (this.isLoginMode) {
-            // 로그인
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) {
-                UI.showToast(`❌ 로그인 실패: ${error.message}`);
-            }
-        } else {
-            // 회원가입
-            const { error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) {
-                UI.showToast(`❌ 가입 실패: ${error.message}`);
+        // Try Login
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            // If login fails, try signup (Auto-signup for demo convenience if user wants, or just error)
+            // For now, strict error
+            if (error.message.includes("Invalid login credentials")) {
+                alert("로그인 정보가 올바르지 않습니다.");
             } else {
-                UI.showToast("✉️ 가입 환영합니다! 이메일 인증을 확인해주세요.");
+                alert("로그인 오류: " + error.message);
             }
         }
     },
 
     async handleLogout() {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) {
-            UI.showToast(`❌ 로그아웃 실패: ${error.message}`);
-        } else {
-            UI.showToast("👋 로그아웃 되었습니다.");
-            location.reload(); // 세션 완전 초기화
-        }
-    },
-
-    async handleGithubLogin() {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'github',
-            options: {
-                redirectTo: window.location.href // Returns to current page
-            }
-        });
-        if (error) {
-            UI.showToast(`❌ GitHub 로그인 실패: ${error.message}`);
-        }
+        await supabaseClient.auth.signOut();
+        window.location.reload();
     }
 };
 
-// Auth.init(); // Removed auto-init
 window.Auth = Auth;

@@ -1,36 +1,12 @@
-const initApp = async () => {
-    console.log('App initialization started');
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Initialize DB (Local Storage setup)
+    DB.init();
 
-    // 1. Auth & DB 초기화 (기초 데이터)
-    if (window.Auth) {
-        console.log('Initializing Auth...');
-        await window.Auth.init();
-    } else {
-        console.error('Auth object not found!');
-    }
+    // 2. Initialize Auth (Check session, update header)
+    await Auth.init();
 
-    if (window.DB) {
-        console.log('Initializing DB...');
-        window.DB.init();
-    }
+    // 3. Initialize UI (Render Dashboard by default, Bind Events)
+    UI.init();
 
-    // 2. UI 초기화 (이후 데이터 기반 렌더링)
-    if (window.UI) {
-        console.log('Initializing UI...');
-        window.UI.init();
-    }
-
-    // 3. OCR 초기화
-    if (window.OCR) {
-        console.log('Initializing OCR...');
-        window.OCR.init();
-    }
-
-    console.log('App initialization completed');
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
-} else {
-    initApp();
-}
+    console.log("DotLog App Initialized 💎");
+});
