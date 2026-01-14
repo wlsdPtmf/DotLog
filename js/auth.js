@@ -1,7 +1,8 @@
 const SUPABASE_URL = 'https://nwpegctozibowenczkmk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cGVnY3Rvemlib3dlbmN6a21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyOTU0NjcsImV4cCI6MjA4Mzg3MTQ2N30.j1q7cUeHaseuwBj7LJ-gYp_3xYrbZ7aIn0bAJOvLGvQ';
 const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabaseClient = supabaseClient;
 
 const Auth = {
     isLoginMode: true,
@@ -65,12 +66,12 @@ const Auth = {
 
     async checkSession() {
         // 현재 세션 확인
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabaseClient.auth.getUser();
         this.user = user;
         this.renderAuthState();
 
         // 인증 상태 변화 감지
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN') {
                 this.user = session.user;
                 this.renderAuthState();
@@ -104,13 +105,13 @@ const Auth = {
 
         if (this.isLoginMode) {
             // 로그인
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) {
                 UI.showToast(`❌ 로그인 실패: ${error.message}`);
             }
         } else {
             // 회원가입
-            const { error } = await supabase.auth.signUp({ email, password });
+            const { error } = await supabaseClient.auth.signUp({ email, password });
             if (error) {
                 UI.showToast(`❌ 가입 실패: ${error.message}`);
             } else {
@@ -120,7 +121,7 @@ const Auth = {
     },
 
     async handleLogout() {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut();
         if (error) {
             UI.showToast(`❌ 로그아웃 실패: ${error.message}`);
         } else {
@@ -130,7 +131,7 @@ const Auth = {
     },
 
     async handleGithubLogin() {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'github',
             options: {
                 redirectTo: window.location.href // Returns to current page

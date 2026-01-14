@@ -9,7 +9,7 @@ const DB = {
     // --- 비즈 (Inventory) 관련 ---
     async getBeads() {
         if (Auth.user) {
-            const { data, error } = await supabase.from('inventory').select('*');
+            const { data, error } = await supabaseClient.from('inventory').select('*');
             if (error) { console.error(error); return []; }
             return data.map(b => ({ id: b.dmc_code, count: b.count, location: b.location }));
         }
@@ -18,7 +18,7 @@ const DB = {
 
     async saveBead(bead) {
         if (Auth.user) {
-            const { error } = await supabase.from('inventory').upsert({
+            const { error } = await supabaseClient.from('inventory').upsert({
                 user_id: Auth.user.id,
                 dmc_code: bead.id,
                 count: bead.count,
@@ -37,7 +37,7 @@ const DB = {
 
     async deleteBead(id) {
         if (Auth.user) {
-            const { error } = await supabase.from('inventory').delete().match({ user_id: Auth.user.id, dmc_code: id });
+            const { error } = await supabaseClient.from('inventory').delete().match({ user_id: Auth.user.id, dmc_code: id });
             if (error) console.error(error);
         } else {
             const beads = JSON.parse(localStorage.getItem('dotlog_beads') || '[]').filter(b => b.id !== id);
@@ -54,7 +54,7 @@ const DB = {
     // --- 도안 (Projects) 관련 ---
     async getProjects() {
         if (Auth.user) {
-            const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('projects').select('*').order('created_at', { ascending: false });
             if (error) { console.error(error); return []; }
             return data.map(p => ({
                 id: p.id,
@@ -77,7 +77,7 @@ const DB = {
             const fileName = `${Auth.user.id}/${Date.now()}.${fileExt}`;
 
             // Upload to 'images' bucket
-            const { error: uploadError } = await supabase.storage
+            const { error: uploadError } = await supabaseClient.storage
                 .from('images')
                 .upload(fileName, file);
 
@@ -87,7 +87,7 @@ const DB = {
             }
 
             // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
+            const { data: { publicUrl } } = supabaseClient.storage
                 .from('images')
                 .getPublicUrl(fileName);
 
@@ -108,7 +108,7 @@ const DB = {
                 if (uploadedUrl) imageUrl = uploadedUrl;
             }
 
-            const { data, error } = await supabase.from('projects').insert({
+            const { data, error } = await supabaseClient.from('projects').insert({
                 user_id: Auth.user.id,
                 name: project.name,
                 brand: project.brand,
@@ -129,7 +129,7 @@ const DB = {
 
     async deleteProject(id) {
         if (Auth.user) {
-            const { error } = await supabase.from('projects').delete().match({ id, user_id: Auth.user.id });
+            const { error } = await supabaseClient.from('projects').delete().match({ id, user_id: Auth.user.id });
             if (error) console.error(error);
         } else {
             const projects = JSON.parse(localStorage.getItem('dotlog_projects') || '[]').filter(p => p.id != id);
@@ -141,7 +141,7 @@ const DB = {
 
     async updateProjectStatus(id, status) {
         if (Auth.user) {
-            const { error } = await supabase.from('projects').update({ status }).match({ id, user_id: Auth.user.id });
+            const { error } = await supabaseClient.from('projects').update({ status }).match({ id, user_id: Auth.user.id });
             if (error) console.error(error);
         } else {
             const projects = JSON.parse(localStorage.getItem('dotlog_projects') || '[]');
@@ -156,7 +156,7 @@ const DB = {
     // --- 도안 상세 (Project Details) 관련 ---
     async getProjectDetails(projectId) {
         if (Auth.user) {
-            const { data, error } = await supabase.from('project_details').select('*').eq('project_id', projectId);
+            const { data, error } = await supabaseClient.from('project_details').select('*').eq('project_id', projectId);
             if (error) { console.error(error); return []; }
             return data.map(d => ({ projectId: d.project_id, dmc: d.dmc_code, isOwned: d.is_owned }));
         }
@@ -167,7 +167,7 @@ const DB = {
     async addProjectDetails(projectId, dmcList) {
         if (Auth.user) {
             const newDetails = dmcList.map(dmc => ({ project_id: projectId, dmc_code: dmc }));
-            const { error } = await supabase.from('project_details').insert(newDetails);
+            const { error } = await supabaseClient.from('project_details').insert(newDetails);
             if (error) console.error(error);
         } else {
             let allDetails = JSON.parse(localStorage.getItem('dotlog_project_details') || '[]').filter(d => d.projectId != projectId);
